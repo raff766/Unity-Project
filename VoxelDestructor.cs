@@ -30,7 +30,7 @@ namespace VoxelModule {
             }
         }
 
-        IEnumerator DestroyCoroutine(Voxel voxel, Action onFinished = null) {
+        IEnumerator DestroyCoroutine(Voxel voxel, Action onFinished) {
             List<Voxel> neighbors = voxel.GetActiveNeighbors();
             var voxelPairs = new HashSet<HashSet<Voxel>>();
             foreach (Voxel start in neighbors) {
@@ -65,8 +65,6 @@ namespace VoxelModule {
                         alreadyChecked.UnionWith(connectedVoxelsToA);
                         if (connectedVoxelsToA.Count > 2) CreateSeparateObject(connectedVoxelsToA);
                     }
-                    onFinished?.Invoke();
-                    //voxelMesh.UpdateMesh();
                     yield return new WaitUntil(() => handleB.IsCompleted);
                     handleB.Complete();
                     resultContainerB.Dispose();
@@ -79,13 +77,12 @@ namespace VoxelModule {
                         alreadyChecked.UnionWith(connectedVoxelsToB);
                         if (connectedVoxelsToB.Count > 2) CreateSeparateObject(connectedVoxelsToB);
                     }
-                    onFinished?.Invoke();
-                    //voxelMesh.UpdateMesh();
                     yield return new WaitUntil(() => handleA.IsCompleted);
                     handleA.Complete();
                     resultContainerA.Dispose();
                 }
             }
+            onFinished.Invoke();
         }
 
         void CreateSeparateObject(IEnumerable<Voxel> voxels) {
